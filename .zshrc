@@ -113,4 +113,5 @@ source $ZSH/oh-my-zsh.sh
 
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 
+[[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"
 [[ -d "$HOME/.antigravity/antigravity/bin" ]] && export PATH="$HOME/.antigravity/antigravity/bin:$PATH"

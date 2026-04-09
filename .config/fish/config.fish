@@ -5,4 +5,9 @@ if status is-interactive
 end
 abbr -a s 'sesh connect "$(sesh list -i | gum filter --limit 1 --placeholder '\''Pick a sesh'\'' --prompt='\''⚡'\'')"'
 abbr -a zad 'ls -d */ | xargs -I {} zoxide add {}'
-starship init fish | source
+if type -q zoxide
+    zoxide init fish | source
+end
+if type -q starship
+    starship init fish | source
+end
