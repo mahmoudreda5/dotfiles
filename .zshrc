@@ -109,6 +109,7 @@ source $ZSH/oh-my-zsh.sh
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+[[ -f ~/.zsh_aliases ]] && source ~/.zsh_aliases
 
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 
