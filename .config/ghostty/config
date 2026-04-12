@@ -1,5 +1,16 @@
-font-size = 17
-font-family = "JetBrains Mono"
-background-blur-radius = 20
+background-image = "assets/jinwoo.png"
+
+# Overall terminal opacity (0.0-1.0)
+# background-opacity = 0.90
+
+# How much the image itself shows through
+background-image-opacity = 0.2
+
+# How the image is scaled
+background-image-fit = cover
+
+# Where the image is placed
+background-image-position = center
+
 mouse-hide-while-typing = true
 macos-option-as-alt = true
