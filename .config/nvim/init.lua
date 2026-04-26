@@ -57,6 +57,14 @@ require("lazy").setup({
   -- Detect indent style automatically per file
   { "tpope/vim-sleuth" },
 
+  -- Git signs in the gutter (added/changed/deleted indicators)
+  {
+    "lewis6991/gitsigns.nvim",
+    config = function()
+      require("gitsigns").setup()
+    end,
+  },
+
   -- Seamless navigation between Vim splits and tmux panes
   { "christoomey/vim-tmux-navigator" },
 
@@ -79,9 +87,56 @@ require("lazy").setup({
     "nvim-telescope/telescope.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
-      require("telescope").setup({})
+      require("telescope").setup({
+        defaults = {
+          file_ignore_patterns = { "%.git/" },
+        },
+        pickers = {
+          find_files = {
+            hidden = true,
+          },
+        },
+      })
       vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>")
       vim.keymap.set("n", "<leader>fg", "<cmd>Telescope live_grep<cr>")
+    end,
+  },
+
+  -- File tree sidebar
+  {
+    "nvim-tree/nvim-tree.lua",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("nvim-tree").setup({
+        on_attach = function(bufnr)
+          local api = require("nvim-tree.api")
+          local opts = { buffer = bufnr, noremap = true, silent = true }
+
+          api.config.mappings.default_on_attach(bufnr)
+
+          -- l/h to expand/collapse like other file tree UIs
+          vim.keymap.set("n", "l", api.node.open.edit, opts)
+          vim.keymap.set("n", "h", api.node.navigate.parent_close, opts)
+          -- Esc to jump back to the file buffer
+          vim.keymap.set("n", "<Esc>", "<C-w>p", opts)
+        end,
+        view = {
+          width = 35,
+        },
+        actions = {
+          change_dir = {
+            restrict_above_cwd = true,
+          },
+          open_file = {
+            quit_on_open = true,
+          },
+        },
+        renderer = {
+          group_empty = true,    -- collapse empty nested folders into one line (e.g. a/b/c)
+        },
+      })
+
+      vim.keymap.set("n", "<leader>o", "<cmd>NvimTreeToggle<cr>")
     end,
   },
 
@@ -128,5 +183,24 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "*.go",
   callback = function()
     vim.lsp.buf.format({ async = false })
+  end,
+})
+
+-- :q exits nvim even when nvim-tree is open alongside one file buffer.
+vim.api.nvim_create_autocmd("QuitPre", {
+  callback = function()
+    local wins = vim.api.nvim_list_wins()
+    local real_wins = 0
+    for _, w in ipairs(wins) do
+      local buf = vim.api.nvim_win_get_buf(w)
+      local is_tree = vim.api.nvim_buf_get_name(buf):match("NvimTree_")
+      local is_floating = vim.api.nvim_win_get_config(w).relative ~= ""
+      if not is_tree and not is_floating then
+        real_wins = real_wins + 1
+      end
+    end
+    if real_wins <= 1 then
+      vim.cmd("qa")
+    end
   end,
 })
