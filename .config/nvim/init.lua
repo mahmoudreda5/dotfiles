@@ -158,6 +158,18 @@ require("lazy").setup({
   },
 
   -- =========================
+  -- Markdown inline rendering
+  -- =========================
+  -- Renders headings, lists, code blocks, tables, checkboxes inline in the
+  -- buffer. Buffer stays editable; toggle with :RenderMarkdown toggle.
+  {
+    "MeanderingProgrammer/render-markdown.nvim",
+    dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
+    ft = { "markdown" },
+    opts = {},
+  },
+
+  -- =========================
   -- LSP: Mason + lspconfig
   -- =========================
   { "mason-org/mason.nvim", config = true },
