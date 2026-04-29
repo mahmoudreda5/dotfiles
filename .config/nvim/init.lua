@@ -141,42 +141,97 @@ require("lazy").setup({
   },
 
   -- =========================
-  -- Go-Specific Plugins
+  -- Treesitter (syntax highlighting)
   -- =========================
-
-  -- Better syntax highlighting for Go (optional but helpful)
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     opts = {
-      ensure_installed = { "go", "gomod", "gosum" },
+      ensure_installed = {
+        "go", "gomod", "gosum",
+        "typescript", "tsx", "javascript",
+        "python", "rust", "lua", "c", "cpp",
+        "bash", "json", "yaml", "markdown", "markdown_inline",
+      },
       highlight = { enable = true },
+    },
+  },
+
+  -- =========================
+  -- LSP: Mason + lspconfig
+  -- =========================
+  { "mason-org/mason.nvim", config = true },
+  {
+    "mason-org/mason-lspconfig.nvim",
+    dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
+    config = function()
+      require("mason-lspconfig").setup({
+        ensure_installed = {
+          "gopls",
+          "ts_ls",
+          "pyright",
+          "rust_analyzer",
+          "lua_ls",
+          "clangd",
+          "bashls",
+          "jsonls",
+          "yamlls",
+          "marksman",
+        },
+      })
+    end,
+  },
+})
+
+-- =========================
+-- Per-server LSP overrides
+-- =========================
+-- Defaults from nvim-lspconfig are applied automatically; only customize here.
+
+vim.lsp.config("gopls", {
+  settings = {
+    gopls = {
+      gofumpt = true,
+      analyses = { unusedparams = true },
+      staticcheck = true,
+    },
+  },
+})
+
+vim.lsp.config("lua_ls", {
+  settings = {
+    Lua = {
+      diagnostics = { globals = { "vim" } },
     },
   },
 })
 
 -- =========================
--- Go-Specific LSP (Neovim 0.11 native)
+-- LSP & navigation keymaps
 -- =========================
-
-vim.lsp.config.gopls = {
-  settings = {
-    gopls = {
-      gofumpt = true, -- Use gofumpt formatting if installed
-      analyses = { unusedparams = true },
-      staticcheck = true,
-    },
-  },
-}
-
-vim.lsp.enable("gopls")
-
--- Keymaps for LSP (kept minimal)
 local opts = { noremap = true, silent = true }
-vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+local tb = function(name)
+  return function() require("telescope.builtin")[name]() end
+end
+
+-- Jump to symbol info (Telescope picker shows preview + fuzzy filter)
+vim.keymap.set("n", "gd", tb("lsp_definitions"), opts)        -- go to definition
+vim.keymap.set("n", "gr", tb("lsp_references"), opts)         -- find references
+vim.keymap.set("n", "gi", tb("lsp_implementations"), opts)    -- implementations of interface
+vim.keymap.set("n", "gy", tb("lsp_type_definitions"), opts)   -- go to type definition
+vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)             -- hover docs
+vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)   -- rename symbol
+vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts) -- code actions
+
+-- Symbol outline / project-wide symbol search
+vim.keymap.set("n", "<leader>ds", tb("lsp_document_symbols"), opts)
+vim.keymap.set("n", "<leader>ws", tb("lsp_dynamic_workspace_symbols"), opts)
+
+-- Diagnostics
+vim.keymap.set("n", "[d", function() vim.diagnostic.jump({ count = -1, float = true }) end, opts)
+vim.keymap.set("n", "]d", function() vim.diagnostic.jump({ count = 1, float = true }) end, opts)
+vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, opts)
+vim.keymap.set("n", "<leader>fd", tb("diagnostics"), opts)
 
 -- Format on save for Go files
 vim.api.nvim_create_autocmd("BufWritePre", {
