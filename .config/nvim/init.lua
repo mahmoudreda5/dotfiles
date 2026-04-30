@@ -35,6 +35,10 @@ vim.opt.swapfile = false          -- Disable swapfile (use undo instead)
 -- Better completion menu behavior
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 
+-- Use the system clipboard for all yank/paste operations.
+-- y/d/p will read/write the macOS clipboard, so cmd+v works in other apps.
+vim.opt.clipboard = "unnamedplus"
+
 -- Bootstrap lazy.nvim (plugin manager)
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
