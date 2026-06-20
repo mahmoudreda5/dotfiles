@@ -242,6 +242,10 @@ if.app-id = 'com.electron.dockerdesktop'
 run = 'move-node-to-workspace D'
 
 [[on-window-detected]]
+if.app-id = 'com.microsoft.VSCode'
+run = 'move-node-to-workspace E'
+
+[[on-window-detected]]
 if.app-id = 'com.google.antigravity'
 run = 'move-node-to-workspace E'
 
